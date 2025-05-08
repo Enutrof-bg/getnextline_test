@@ -62,7 +62,6 @@ char *ft_strjoin(char *s1, char *s2)
 		j++;
 	}
 	newlist[i + j] = '\0';
-	// free(s1);
 	return (newlist);
 }
 
