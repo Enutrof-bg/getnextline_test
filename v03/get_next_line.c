@@ -12,81 +12,11 @@
 
 #include "get_next_line.h"
 
-int ft_strlen(char *str)
+char	*ft_str_return(char *str)
 {
-	int i = 0;
-	while (str[i])
-	{
-		i++;
-	}
-	return (i);
-}
-
-char *ft_strdup(char *str)
-{
-	char *newstr;
-	int i;
-
-	i = 0;
-	newstr = malloc(sizeof(char) * (ft_strlen(str) + 1));
-	if (!newstr)
-		return (NULL);
-	while (str[i])
-	{
-		newstr[i] = str[i];
-		i++;
-	}
-	newstr[i] = '\0';
-	return (newstr);
-}
-
-char *ft_strjoin(char *s1, char *s2)
-{
-	char *newlist;
-	int i;
-	int j;
-
-	i = 0;
-	j = 0;
-	newlist = malloc(sizeof(char) * (ft_strlen(s1) + ft_strlen(s2) + 1));
-	if (!newlist)
-		return (NULL);
-	while (s1[i])
-	{
-		newlist[i] = s1[i];
-		i++;
-	}
-	while (s2[j])
-	{
-		newlist[i + j] = s2[j];
-		j++;
-	}
-	newlist[i + j] = '\0';
-	return (newlist);
-}
-
-char *ft_calloc(int size)
-{
-	int i;
-	char *newcalloc;
-
-	i = 0;
-	newcalloc = malloc(sizeof(char) * (size));
-	if (!newcalloc)
-		return (NULL);
-	while (i < size)
-	{
-		newcalloc[i] = 0;
-		i++;
-	}
-	return (newcalloc);
-}
-
-char *ft_str_return(char *str)
-{
-	int i;
-	int j;
-	char *newstr;
+	int		i;
+	int		j;
+	char	*newstr;
 
 	i = 0;
 	j = 0;
@@ -108,9 +38,9 @@ char *ft_str_return(char *str)
 
 char	*ft_str_reste(char *str)
 {
-	int i;
-	int j;
-	char *newstr;
+	int		i;
+	int		j;
+	char	*newstr;
 
 	i = 0;
 	j = 0;
@@ -133,71 +63,88 @@ char	*ft_str_reste(char *str)
 	return (newstr);
 }
 
-int ft_check(char *str, char c)
-{
-	int i;
-
-	i = 0;
-	while (str[i])
-	{
-		if (str[i] == c)
-			return (1);
-		i++;
-	}
-	return (0);
-}
-
-char *get_next_line(int fd)
-{
-	int readfd;
-	static	char *str;
-	char *charread;
+char	*ft_read(int fd, char *str)
+{	
 	char *temp;
-	char *strreturn;
+	char *charread;
+	int readfd;
 
-	if (fd < 0 || BUFFER_SIZE < 0)
-		return (NULL);
-	if (!str)
-	{
-		str = malloc(sizeof(char) * 1);
-		if (!str)
-			return (NULL);
-		str[0] = '\0';
-	}
-	// str = temp;
 	charread = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (!charread)
 		return (NULL);
-	while ((readfd = read(fd, charread, BUFFER_SIZE)) > 0/*&& ft_check(str, '\n') != 1*/)
+	readfd = read(fd, charread, BUFFER_SIZE);
+	while (readfd > 0)
 	{
 		charread[readfd] = '\0';
 		temp = ft_strjoin(str, charread);
 		if (!temp)
 			return (NULL);
 		free(str);
-		str = ft_strdup(temp);
-		if (!str)
-			return (NULL);
-		free(temp);
+		str = temp;
 		if (ft_check(charread, '\n') == 1)
-		{
-			break;
-		}
+			break ;
+		readfd = read(fd, charread, BUFFER_SIZE);
 	}
 	free(charread);
-	if (readfd <= -1)
-		{
-			return (NULL);
-		}
-	if (readfd <= 0 && (str[0] == '\0' || !str))
+	if (readfd == -1)
+		return (free(str), str = NULL, NULL);
+	if (readfd == 0 && (str[0] == '\0' || !str))
 	{
 		if (str)
-		{
-			free(str);
-			str = NULL;
-		}
+			return (free(str), str = NULL, NULL);
 		return (NULL);
 	}
+	return (str);
+}
+
+char	*get_next_line(int fd)
+{
+	// int				readfd;
+	static char		*str;
+	// char			*charread;
+	char			*temp;
+	char			*strreturn;
+
+	if (fd < 0 || BUFFER_SIZE < 0)
+		return (NULL);
+	if (!str)
+	{
+		str = ft_calloc(sizeof(char) * 1);
+		if (!str)
+			return (NULL);
+	}
+	str = ft_read(fd, str);
+	if (!str)
+		return (NULL);
+	/*
+	charread = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!charread)
+		return (NULL);
+	readfd = read(fd, charread, BUFFER_SIZE);
+	while (readfd > 0)
+	{
+		charread[readfd] = '\0';
+		temp = ft_strjoin(str, charread);
+		if (!temp)
+			return (NULL);
+		free(str);
+		str = temp;
+		if (ft_check(charread, '\n') == 1)
+			break ;
+		readfd = read(fd, charread, BUFFER_SIZE);
+	}
+	free(charread);
+	*/
+	/*
+	if (readfd == -1)
+		return (free(str), str = NULL, NULL);
+	if (readfd == 0 && (str[0] == '\0' || !str))
+	{
+		if (str)
+			return (free(str), str = NULL, NULL);
+		return (NULL);
+	}
+	*/
 	strreturn = ft_str_return(str);
 	if (!strreturn)
 		return (NULL);
@@ -205,20 +152,12 @@ char *get_next_line(int fd)
 	if (!temp)
 		return (NULL);
 	free(str);
-	str = ft_strdup(temp);
-	free(temp);
-	if (!str)	
-		return (NULL);
+	str = temp;
 	if (str && str[0] == '\0')
-	{
-		free(str);
-		str = NULL;
-	}
-	// if (readfd < 0)
-		// return (NULL);
+		return (free(str), str = NULL, strreturn);
 	return (strreturn);
 }
-/*
+
 int main()
 {
 	// int fd = STDIN_FILENO;
@@ -229,6 +168,7 @@ int main()
 	// }
 
 	// printf("%d\n", BUFFER_SIZE);
+	// close(fd);
 
     char *line;
     int idx = 0;
@@ -237,8 +177,11 @@ int main()
     	printf("[%d] '%s'\n", idx++, line);
     	free(line);
 	} while (line != NULL);
+	// line = get_next_line(fd);
+    // printf("[%d] '%s'\n", idx++, line);
+    // free(line);
 }
-*/
+
 	// char *newstr = get_next_line(fd);
 	// printf("%s", newstr);
 	// free(newstr);
@@ -247,7 +190,7 @@ int main()
 	// newstr = get_next_line(fd);
 	// printf("%s", newstr);
 	// free(newstr);
-	
+
 	// //printf("test3");
 	// newstr = get_next_line(fd);
 	// printf("%s", newstr);
@@ -257,9 +200,6 @@ int main()
 	// newstr = get_next_line(fd);
 	// printf("%s", newstr);
 	// free(newstr);
-
-
-
 
 /*
 char	*get_next_line(int fd)
@@ -334,8 +274,6 @@ char	*get_next_line(int fd)
 	printf("readtest : %d\n%s\n", readtest, buf);
 */
 	// printf("%s\n", ft_strjoin("bonjour", "123456"));
-
-
 
 // save de getnextline avec buffer 1
 /*
